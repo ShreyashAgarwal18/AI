@@ -1,0 +1,86 @@
+ Assignment 8 - Artificial Intelligence
+ N-Queens Problem using Backtracking + Branch and Bound
+
+ Place N queens on an NxN chessboard so that no two queens
+ attack each other (no two in the same row, column, or diagonal).
+
+ Backtracking try a queen in each row, backtrack if invalid.
+ Branch and Bound prune branches early using O(1) safety checks
+   with arrays for columns and diagonals.
+
+#include iostream
+#include vector
+using namespace std;
+
+const int N = 4;             size of board (NxN)
+
+ Branch and Bound flags - O(1) is this position safe check
+bool col[N];                 col[c]  = true if a queen is in column c
+bool d1[2N];                d1[r+c] = true if queen is on  diagonal
+bool d2[2N];                d2[r-c+N-1] = true if queen is on  diagonal
+
+int board[N];                board[r] = column of queen in row r
+int solutionCount = 0;
+
+ ============================================================
+ Print the board
+ ============================================================
+void printBoard() {
+    solutionCount++;
+    cout  nSolution   solutionCount  n;
+    for (int r = 0; r  N; r++) {
+        for (int c = 0; c  N; c++) {
+            if (board[r] == c) cout  Q ;
+            else               cout  . ;
+        }
+        cout  endl;
+    }
+}
+
+ ============================================================
+ Backtracking + Branch and Bound
+ Try placing a queen in each column of the given row.
+ ============================================================
+void solve(int row) {
+     Base case all queens placed successfully
+    if (row == N) {
+        printBoard();
+        return;
+    }
+
+     Try each column in this row
+    for (int c = 0; c  N; c++) {
+
+         PRUNING (Branch and Bound)
+         Skip if this column or either diagonal is already occupied
+        if (col[c]  d1[row + c]  d2[row - c + N - 1])
+            continue;
+
+         PLACE the queen
+        board[row] = c;
+        col[c] = true;
+        d1[row + c] = true;
+        d2[row - c + N - 1] = true;
+
+         RECURSE for the next row
+        solve(row + 1);
+
+         BACKTRACK - undo the placement
+        col[c] = false;
+        d1[row + c] = false;
+        d2[row - c + N - 1] = false;
+    }
+}
+
+ ============================================================
+ MAIN
+ ============================================================
+int main() {
+    cout  === N-Queens Problem (N =   N  ) ===n;
+    cout  Using Backtracking + Branch and Boundn;
+
+    solve(0);
+
+    cout  nTotal solutions found   solutionCount  endl;
+    return 0;
+}

@@ -1,0 +1,70 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct Job {
+    char id;
+    int deadline;
+    int profit;
+};
+
+bool compare(Job a, Job b) {
+    return a.profit > b.profit;
+}
+
+int main() {
+
+    Job jobs[] = {
+        {'A', 2, 100},
+        {'B', 1, 19},
+        {'C', 2, 27},
+        {'D', 1, 25},
+        {'E', 3, 15}
+    };
+
+    int n = sizeof(jobs) / sizeof(jobs[0]);
+
+    // Sort jobs according to profit
+    sort(jobs, jobs + n, compare);
+
+    int maxDeadline = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (jobs[i].deadline > maxDeadline)
+            maxDeadline = jobs[i].deadline;
+    }
+
+    char slot[maxDeadline];
+    bool filled[maxDeadline];
+
+    for (int i = 0; i < maxDeadline; i++) {
+        filled[i] = false;
+    }
+
+    int totalProfit = 0;
+
+    // Job Scheduling
+    for (int i = 0; i < n; i++) {
+
+        for (int j = jobs[i].deadline - 1; j >= 0; j--) {
+
+            if (!filled[j]) {
+                slot[j] = jobs[i].id;
+                filled[j] = true;
+                totalProfit += jobs[i].profit;
+                break;
+            }
+        }
+    }
+
+    cout << "Selected Jobs:\n";
+
+    for (int i = 0; i < maxDeadline; i++) {
+        if (filled[i])
+            cout << slot[i] << " ";
+    }
+
+    cout << "\nTotal Profit = " << totalProfit << endl;
+
+    return 0;
+}

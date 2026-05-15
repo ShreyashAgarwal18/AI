@@ -1,0 +1,103 @@
+// Assignment 9 - Artificial Intelligence
+// Elementary Chatbot for customer interaction (e-commerce store)
+//
+// Rule-based chatbot: scans the user's input for keywords
+// and replies with a matching predefined response.
+
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+// ============================================================
+// Convert a string to lowercase for case-insensitive matching
+// ============================================================
+string toLower(string s) {
+    for (char &c : s) c = tolower(c);
+    return s;
+}
+
+// ============================================================
+// Check if `input` contains the keyword `key` as a substring
+// ============================================================
+bool contains(string input, string key) {
+    return input.find(key) != string::npos;
+}
+
+// ============================================================
+// Generate a reply based on simple keyword matching
+// ============================================================
+string getReply(string input) {
+    input = toLower(input);
+
+    // ---- Greetings ----
+    if (contains(input, "hi") || contains(input, "hello") || contains(input, "hey"))
+        return "Hello! Welcome to ShopBot. How can I help you today?";
+
+    // ---- Customer asks about products ----
+    if (contains(input, "product") || contains(input, "item"))
+        return "We sell electronics, clothing, books, and home appliances.";
+
+    // ---- Order tracking ----
+    if (contains(input, "order") || contains(input, "track"))
+        return "Please share your order ID and I'll fetch the latest status.";
+
+    // ---- Pricing ----
+    if (contains(input, "price") || contains(input, "cost"))
+        return "Prices vary by product. Tell me which item you're interested in.";
+
+    // ---- Return / Refund ----
+    if (contains(input, "return") || contains(input, "refund"))
+        return "We accept returns within 7 days of delivery. Need a return link?";
+
+    // ---- Delivery ----
+    if (contains(input, "delivery") || contains(input, "shipping"))
+        return "Standard delivery takes 3-5 business days.";
+
+    // ---- Payment ----
+    if (contains(input, "payment") || contains(input, "pay"))
+        return "We accept UPI, credit/debit cards, and cash on delivery.";
+
+    // ---- Contact ----
+    if (contains(input, "contact") || contains(input, "support") || contains(input, "help"))
+        return "You can reach our support team at support@shopbot.com or call 1800-123-456.";
+
+    // ---- Thanks ----
+    if (contains(input, "thank") || contains(input, "thanks"))
+        return "You're welcome! Anything else I can help you with?";
+
+    // ---- Goodbye ----
+    if (contains(input, "bye") || contains(input, "exit") || contains(input, "quit"))
+        return "BYE";       // special signal to exit the loop
+
+    // ---- Default fallback ----
+    return "Sorry, I didn't quite get that. Could you rephrase your question?";
+}
+
+// ============================================================
+// MAIN - chat loop
+// ============================================================
+int main() {
+    cout << "=========================================\n";
+    cout << "   ShopBot - Customer Care Chatbot\n";
+    cout << "=========================================\n";
+    cout << "(Type 'bye' or 'exit' to end the chat)\n\n";
+
+    string userInput;
+
+    while (true) {
+        cout << "You    : ";
+        getline(cin, userInput);
+
+        if (userInput.empty()) continue;
+
+        string reply = getReply(userInput);
+        if (reply == "BYE") {
+            cout << "ShopBot: Goodbye! Have a great day!\n";
+            break;
+        }
+        cout << "ShopBot: " << reply << "\n\n";
+    }
+
+    return 0;
+}

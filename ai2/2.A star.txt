@@ -1,0 +1,135 @@
+// Assignment 2 - Artificial Intelligence
+// A* (A-Star) Algorithm for shortest path on a grid.
+//
+// A* uses:  f(n) = g(n) + h(n)
+//   g(n) = cost from start to current node
+//   h(n) = heuristic (estimated cost from current to goal)
+//   f(n) = total estimated cost
+// At each step, the node with the SMALLEST f is expanded next.
+
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+// ============================================================
+// Grid setup
+// 0 = open cell, 1 = blocked (wall)
+// ============================================================
+const int ROWS = 5, COLS = 5;
+int grid[ROWS][COLS] = {
+    {0, 0, 0, 0, 0},
+    {0, 1, 1, 0, 0},
+    {0, 0, 0, 0, 0},
+    {0, 1, 0, 1, 0},
+    {0, 0, 0, 0, 0}
+};
+
+// ============================================================
+// Node structure for A*
+// ============================================================
+struct Node {
+    int x, y;          // position
+    int g, h;          // costs
+    int f() const { return g + h; }
+};
+
+// Comparator for priority queue (smallest f first)
+struct Compare {
+    bool operator()(const Node &a, const Node &b) {
+        return a.f() > b.f();
+    }
+};
+
+// ============================================================
+// Heuristic: Manhattan distance
+// h(n) = |x1-x2| + |y1-y2|
+// ============================================================
+int heuristic(int x1, int y1, int x2, int y2) {
+    return abs(x1 - x2) + abs(y1 - y2);
+}
+
+// ============================================================
+// A* Search
+// Returns the cost from start to goal, prints the path.
+// ============================================================
+void aStar(int startX, int startY, int goalX, int goalY) {
+    priority_queue<Node, vector<Node>, Compare> open;
+    bool closed[ROWS][COLS] = {false};
+    int parentX[ROWS][COLS], parentY[ROWS][COLS];
+
+    open.push({startX, startY, 0, heuristic(startX, startY, goalX, goalY)});
+    parentX[startX][startY] = -1;
+    parentY[startX][startY] = -1;
+
+    // Movement: up, down, left, right
+    int dx[] = {-1, 1, 0, 0};
+    int dy[] = {0, 0, -1, 1};
+
+    while (!open.empty()) {
+        Node curr = open.top();
+        open.pop();
+
+        // Goal reached?
+        if (curr.x == goalX && curr.y == goalY) {
+            cout << "Goal reached! Total cost = " << curr.g << endl;
+
+            // Reconstruct path by walking parents backwards
+            cout << "Path: ";
+            vector<pair<int,int>> path;
+            int x = goalX, y = goalY;
+            while (x != -1) {
+                path.push_back({x, y});
+                int px = parentX[x][y];
+                int py = parentY[x][y];
+                x = px; y = py;
+            }
+            for (int i = path.size() - 1; i >= 0; i--)
+                cout << "(" << path[i].first << "," << path[i].second << ") ";
+            cout << endl;
+            return;
+        }
+
+        if (closed[curr.x][curr.y]) continue;
+        closed[curr.x][curr.y] = true;
+
+        // Try all 4 neighbours
+        for (int i = 0; i < 4; i++) {
+            int nx = curr.x + dx[i];
+            int ny = curr.y + dy[i];
+
+            // Skip out-of-bounds, walls, already visited
+            if (nx < 0 || nx >= ROWS || ny < 0 || ny >= COLS) continue;
+            if (grid[nx][ny] == 1 || closed[nx][ny]) continue;
+
+            int newG = curr.g + 1;          // each step costs 1
+            int newH = heuristic(nx, ny, goalX, goalY);
+            open.push({nx, ny, newG, newH});
+
+            parentX[nx][ny] = curr.x;
+            parentY[nx][ny] = curr.y;
+        }
+    }
+    cout << "No path found.\n";
+}
+
+// ============================================================
+// MAIN
+// ============================================================
+int main() {
+    cout << "=== A* Algorithm on a Grid ===\n\n";
+    cout << "Grid (0 = open, 1 = wall):\n";
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) cout << grid[i][j] << " ";
+        cout << endl;
+    }
+
+    int sx = 0, sy = 0;        // start
+    int gx = 4, gy = 4;        // goal
+    cout << "\nStart : (" << sx << "," << sy << ")"
+         << "  Goal : (" << gx << "," << gy << ")\n\n";
+
+    aStar(sx, sy, gx, gy);
+    return 0;
+}

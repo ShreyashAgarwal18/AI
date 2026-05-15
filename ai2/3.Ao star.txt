@@ -1,0 +1,122 @@
+// Assignment 3 - Artificial Intelligence
+// AO* (AND-OR Star) Algorithm
+//
+// AO* works on AND-OR graphs where some nodes have AND-children
+// (must solve ALL) and others have OR-children (must solve ANY).
+// It finds the cheapest "solution graph" by computing minimum costs.
+
+#include <iostream>
+#include <map>
+#include <vector>
+#include <climits>
+using namespace std;
+
+// ============================================================
+// Heuristic values for each node (estimated cost to solve)
+// ============================================================
+map<string, int> h = {
+    {"A", 0}, {"B", 4}, {"C", 5}, {"D", 7},
+    {"E", 6}, {"F", 9}, {"G", 3}, {"H", 0}, {"I", 0}
+};
+
+// ============================================================
+// AND-OR graph
+// Each node has a list of "branches"
+// Each branch is a group of children that must ALL be solved (AND)
+// Multiple branches mean any one branch can be chosen (OR)
+//
+// Example:
+//   A -> [(B, C)]      means solve B AND C
+//   A -> [(D), (E)]    means solve D OR E
+// ============================================================
+map<string, vector<vector<string>>> graph = {
+    {"A", {{"B", "C"}, {"D"}}},     // A: AND(B,C)  OR  D
+    {"B", {{"E", "F"}}},            // B: AND(E,F)
+    {"C", {{"G"}, {"H"}}},          // C: G OR H
+    {"D", {{"I"}}}                  // D: I
+};
+
+// ============================================================
+// AO* recursive function
+// Returns the minimum cost to solve a node and stores the
+// best branch chosen for that node.
+// ============================================================
+map<string, vector<string>> solution;     // best branch chosen at each node
+
+int aoStar(string node) {
+    // Leaf node (no children) => cost is its heuristic
+    if (graph.find(node) == graph.end()) {
+        return h[node];
+    }
+
+    int bestCost = INT_MAX;
+    vector<string> bestBranch;
+
+    // Try each branch (OR choice)
+    for (auto &branch : graph[node]) {
+        int cost = 0;
+        // Add up cost of every child in this branch (AND)
+        // +1 is the edge cost from parent to each child
+        for (auto &child : branch) {
+            cost += aoStar(child) + 1;
+        }
+        if (cost < bestCost) {
+            bestCost = cost;
+            bestBranch = branch;
+        }
+    }
+
+    solution[node] = bestBranch;
+    h[node] = bestCost;       // update heuristic with computed cost
+    return bestCost;
+}
+
+// ============================================================
+// Print the solution graph (the chosen path from start)
+// ============================================================
+void printSolution(string node) {
+    cout << node;
+    if (solution.find(node) == solution.end()) return;
+
+    cout << " -> [";
+    for (size_t i = 0; i < solution[node].size(); i++) {
+        cout << solution[node][i];
+        if (i + 1 < solution[node].size()) cout << ", ";
+    }
+    cout << "]\n";
+
+    for (auto &child : solution[node])
+        printSolution(child);
+}
+
+// ============================================================
+// MAIN
+// ============================================================
+int main() {
+    cout << "=== AO* Algorithm on AND-OR Graph ===\n\n";
+
+    cout << "Initial heuristic values:\n";
+    for (auto &p : h)
+        cout << "  h(" << p.first << ") = " << p.second << endl;
+
+    cout << "\nGraph structure (branches separated by OR):\n";
+    for (auto &p : graph) {
+        cout << "  " << p.first << " : ";
+        for (size_t i = 0; i < p.second.size(); i++) {
+            cout << "AND{ ";
+            for (auto &c : p.second[i]) cout << c << " ";
+            cout << "}";
+            if (i + 1 < p.second.size()) cout << " OR ";
+        }
+        cout << endl;
+    }
+
+    string start = "A";
+    int cost = aoStar(start);
+
+    cout << "\nMinimum cost to solve " << start << " = " << cost << endl;
+    cout << "\nSolution Graph:\n";
+    printSolution(start);
+
+    return 0;
+}

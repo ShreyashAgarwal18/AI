@@ -1,0 +1,59 @@
+// Assignment 4 - Artificial Intelligence
+// Selection Sort - a greedy sorting algorithm
+//
+// Idea: Repeatedly find the minimum element from the unsorted part
+// and place it at the beginning. Continue until the whole array is sorted.
+
+#include <iostream>
+using namespace std;
+
+// ============================================================
+// Selection Sort
+// ============================================================
+void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        // Step 1: Assume i is the index of the minimum
+        int minIndex = i;
+
+        // Step 2: Find the actual minimum in the unsorted part
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+
+        // Step 3: Swap the found minimum with arr[i]
+        if (minIndex != i) {
+            int temp = arr[i];
+            arr[i] = arr[minIndex];
+            arr[minIndex] = temp;
+        }
+
+        // Step 4: Print the array after each pass (to see progress)
+        cout << "After pass " << (i + 1) << ": ";
+        for (int k = 0; k < n; k++) cout << arr[k] << " ";
+        cout << endl;
+    }
+}
+
+// ============================================================
+// MAIN
+// ============================================================
+int main() {
+    int arr[] = {64, 25, 12, 22, 11};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    cout << "=== Selection Sort ===\n\n";
+
+    cout << "Original array: ";
+    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    cout << "\n\n";
+
+    selectionSort(arr, n);
+
+    cout << "\nSorted array: ";
+    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    cout << endl;
+
+    return 0;
+}
